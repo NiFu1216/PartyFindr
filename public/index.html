@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>PartyFindr — Find local self-hosted parties</title>
+  <meta name="description" content="Discover small, self-hosted parties near you. Meet people, make friends." />
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <header class="navbar">
+    <a href="#/" class="brand" data-link>🎉 PartyFindr</a>
+    <nav id="nav-links">
+      <a href="#/map" data-link>Map</a>
+      <a href="#/host" data-link>Host</a>
+      <a href="#/profile" data-link>Profile</a>
+      <a href="#/login" data-link id="nav-login">Login</a>
+      <button id="nav-logout" class="link-btn" hidden>Logout</button>
+    </nav>
+  </header>
+
+  <main id="app"></main>
+
+  <div id="toast" class="toast" hidden></div>
+
+  <!-- Page templates -->
+  <template id="tpl-home">
+    <section class="hero">
+      <h1>Find a party. Make a friend.</h1>
+      <p>PartyFindr shows you small, self-hosted parties from real people nearby — not big company events.</p>
+      <div class="cta">
+        <a href="#/register" id="get-started" class="btn primary" data-link>Get started</a>
+        <a href="#/login" id="alr-have-acc" class="btn ghost" data-link>I already have an account</a>
+      </div>
+    </section>
+  </template>
+
+  <template id="tpl-login">
+    <section class="card narrow">
+      <h2>Log in</h2>
+      <form id="login-form">
+        <label>Email <input type="email" name="email" required /></label>
+        <label>Password <input type="password" name="password" required /></label>
+        <button class="btn primary" type="submit">Log in</button>
+      </form>
+      <p class="muted">No account? <a href="#/register" data-link>Register</a></p>
+    </section>
+  </template>
+
+  <template id="tpl-register">
+    <section class="card narrow">
+      <h2>Create your account</h2>
+      <form id="register-form">
+        <label>Email <input type="email" name="email" required /></label>
+        <label>Password <input type="password" name="password" minlength="6" required /></label>
+        <label>Date of birth <input type="date" name="dob" required /></label>
+        <label class="check">
+          <input type="checkbox" name="attested" required />
+          I confirm my date of birth is accurate. (You must be 16+)
+        </label>
+        <button class="btn primary" type="submit">Register</button>
+      </form>
+      <p class="muted">Already have one? <a href="#/login" data-link>Log in</a></p>
+    </section>
+  </template>
+
+  <template id="tpl-map">
+    <section class="map-wrap">
+      <div class="row between">
+        <div>
+          <h2>Parties near you</h2>
+          <p id="map-summary" class="muted"></p>
+        </div>
+        <a href="#/host" class="btn primary" data-link>+ Host a party</a>
+      </div>
+        <div class="row">
+            <label>
+                Min age
+                <input type="number" id="filter-min-age" value="16" min="16" max="99">
+            </label>
+            <label>
+                Max age
+                <input type="number" id="filter-max-age" value="99" min="16" max="99">
+            </label>
+            <button id="apply-filter" class="btn ghost">Apply</button>
+        </div>
+      <div id="map"></div>
+      <div id="party-list" class="grid"></div>
+    </section>
+  </template>
+
+  <template id="tpl-host">
+    <section class="card">
+      <h2>Host a party</h2>
+      <p class="muted">Click on the map to set the location.</p>
+      <div id="host-map"></div>
+      <form id="host-form" class="form-grid">
+        <label>Title <input name="title" required /></label>
+        <label>Starts at <input name="startsAt" type="datetime-local" required /></label>
+        <label class="span-2">Description <textarea name="description" required rows="3"></textarea></label>
+        <label>Capacity <input name="capacity" type="number" min="2" max="200" value="10" required /></label>
+        <label>Min age <input name="minAge" type="number" min="16" max="99" value="18" required /></label>
+        <label>Max age <input name="maxAge" type="number" min="16" max="99" value="40" required /></label>
+        <input type="hidden" name="lat" /><input type="hidden" name="lng" />
+        <button class="btn primary span-2" type="submit">Publish party</button>
+      </form>
+    </section>
+  </template>
+
+  <template id="tpl-profile">
+    <section class="card">
+      <h2>Your profile</h2>
+      <div id="profile-info"></div>
+      <h3>Parties you're attending</h3>
+      <div id="attended-list" class="grid"></div>
+    </section>
+  </template>
+
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script src="api.js"></script>
+  <script src="index.js"></script>
+</body>
+</html>
