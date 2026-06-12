@@ -26,10 +26,16 @@ Open http://localhost:3000
 - JWT session tokens stored in `localStorage`
 - Leaflet + OpenStreetMap interactive map (no API key required)
 - Open-Meteo weather badges per party (no API key required)
+- Nominatim/OpenStreetMap reverse geocoding for party location names (no API key required)
 - Host parties by clicking on the map; set capacity and age range
 - Click a party marker → "Attend party" button (enforces capacity & age range)
+- Manage your hosted parties in the SPA with edit and delete actions
 - Profile page lists parties you've joined
 - All page loads done asynchronously via `fetch()` (AJAX)
+
+## Second frontend component
+
+`public/host-dashboard.html` with `public/host-dashboard.js` is a separate host-facing frontend. It communicates with `/auth/me`, `/parties`, `/parties/:id`, `PUT /parties/:id`, and `DELETE /parties/:id`.
 
 ## API endpoints
 
@@ -39,7 +45,10 @@ Open http://localhost:3000
 | POST   | /auth/login              | no   | Log in                     |
 | GET    | /auth/me                 | yes  | Current user               |
 | GET    | /parties                 | no   | List all parties           |
+| GET    | /parties/:id             | no   | Get one party              |
 | POST   | /parties                 | yes  | Create a party             |
+| PUT    | /parties/:id             | yes  | Update a hosted party      |
+| DELETE | /parties/:id             | yes  | Delete a hosted party      |
 | POST   | /parties/:id/attend      | yes  | Join a party               |
 | GET    | /me/attended             | yes  | Parties you joined         |
 

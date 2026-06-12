@@ -31,7 +31,10 @@ const api = {
   login:    (input) => request("/auth/login",    { method: "POST", body: JSON.stringify(input) }),
   me:       () => request("/auth/me").then(r => r.user),
   listParties:  () => request("/parties"),
+  getParty:     (id) => request("/parties/" + id),
   createParty:  (input) => request("/parties", { method: "POST", body: JSON.stringify(input) }),
+  updateParty:  (id, input) => request("/parties/" + id, { method: "PUT", body: JSON.stringify(input) }),
+  deleteParty:  (id) => request("/parties/" + id, { method: "DELETE" }),
   attendParty:  (id) => request("/parties/" + id + "/attend", { method: "POST" }),
   myAttended:   () => request("/me/attended"),
 };
@@ -46,6 +49,17 @@ async function fetchWeather(lat, lng) {
     return data.current;
   } catch { return null; }
 }
+
+async function fetchPlaceName(lat, lng) {
+  try {
+    const url = `https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${lat}&lon=${lng}`;
+    const res = await fetch(url, { headers: { Accept: "application/json" } });
+    if (!res.ok) return "";
+    const data = await res.json();
+    return data.name || data.address?.suburb || data.address?.city || data.address?.town || "";
+  } catch { return ""; }
+}
+
 function weatherEmoji(code) {
   if (code == null) return "";
   if (code === 0) return "☀️";

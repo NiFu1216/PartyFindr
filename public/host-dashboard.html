@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PartyFindr Host Dashboard</title>
+  <meta name="description" content="Manage parties you host on PartyFindr.">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header class="navbar">
+    <a href="/" class="brand" data-link>🎉 PartyFindr</a>
+    <button id="nav-toggle" class="menu-toggle" type="button" aria-label="Open menu" aria-expanded="false" aria-controls="nav-links">
+      <span></span>
+      <span></span>
+      <span></span>
+    </button>
+    <nav id="nav-links">
+      <a href="/#/map" data-link>Main app</a>
+      <button id="dashboard-logout" class="link-btn" hidden>Logout</button>
+    </nav>
+  </header>
+
+  <main>
+    <section class="dashboard-header">
+      <div>
+        <h1>Host Dashboard</h1>
+        <p class="muted">Manage the parties you created.</p>
+      </div>
+      <a href="/#/host" class="btn primary">Host a party</a>
+    </section>
+
+    <section id="dashboard-login" class="card narrow" hidden>
+      <h2>Log in</h2>
+      <form id="dashboard-login-form">
+        <label>Email <input type="email" name="email" required></label>
+        <label>Password <input type="password" name="password" required></label>
+        <button class="btn primary" type="submit">Log in</button>
+      </form>
+    </section>
+
+    <section id="dashboard-app" hidden>
+      <div id="dashboard-summary" class="card dashboard-summary"></div>
+      <div id="dashboard-list" class="grid"></div>
+    </section>
+  </main>
+
+  <div id="toast" class="toast" hidden></div>
+
+  <script src="api.js"></script>
+  <script src="host-dashboard.js"></script>
+</body>
+</html>

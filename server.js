@@ -170,6 +170,12 @@ app.get("/parties", (req, res) => {
   res.json(rows.map(partyWithAttendees));
 });
 
+app.get("/parties/:id", (req, res) => {
+  const row = db.prepare("SELECT * FROM parties WHERE id = ?").get(req.params.id);
+  if (!row) return res.status(404).json({ error: "Party not found." });
+  res.json(partyWithAttendees(row));
+});
+
 app.post("/parties", authMiddleware, (req, res) => {
   const host = db.prepare("SELECT * FROM users WHERE id = ?").get(req.userId);
   if (!host) return res.status(401).json({ error: "Invalid session." });
@@ -185,6 +191,39 @@ app.post("/parties", authMiddleware, (req, res) => {
     .run(id, title, description, host.id, hostName, lat, lng, startsAt, capacity, minAge ?? 16, maxAge ?? 99);
   const row = db.prepare("SELECT * FROM parties WHERE id = ?").get(id);
   res.json(partyWithAttendees(row));
+});
+
+app.put("/parties/:id", authMiddleware, (req, res) => {
+  const row = db.prepare("SELECT * FROM parties WHERE id = ?").get(req.params.id);
+  if (!row) return res.status(404).json({ error: "Party not found." });
+  if (row.host_id !== req.userId) {
+    return res.status(403).json({ error: "Only the host can update this party." });
+  }
+
+  const { title, description, lat, lng, startsAt, capacity, minAge, maxAge } = req.body || {};
+  if (!title || !description || lat == null || lng == null || !startsAt || !capacity || minAge == null || maxAge == null) {
+    return res.status(400).json({ error: "Missing fields." });
+  }
+
+  db.prepare(`UPDATE parties
+    SET title = ?, description = ?, lat = ?, lng = ?, starts_at = ?, capacity = ?, min_age = ?, max_age = ?
+    WHERE id = ?`)
+    .run(title, description, lat, lng, startsAt, capacity, minAge, maxAge, req.params.id);
+
+  const updated = db.prepare("SELECT * FROM parties WHERE id = ?").get(req.params.id);
+  res.json(partyWithAttendees(updated));
+});
+
+app.delete("/parties/:id", authMiddleware, (req, res) => {
+  const row = db.prepare("SELECT * FROM parties WHERE id = ?").get(req.params.id);
+  if (!row) return res.status(404).json({ error: "Party not found." });
+  if (row.host_id !== req.userId) {
+    return res.status(403).json({ error: "Only the host can delete this party." });
+  }
+
+  db.prepare("DELETE FROM attendance WHERE party_id = ?").run(req.params.id);
+  db.prepare("DELETE FROM parties WHERE id = ?").run(req.params.id);
+  res.status(204).end();
 });
 
 app.post("/parties/:id/attend", authMiddleware, (req, res) => {

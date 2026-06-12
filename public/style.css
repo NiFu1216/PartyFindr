@@ -39,9 +39,74 @@ h1 { font-size: 2.2rem; }
 .brand { font-weight: 700; font-size: 1.2rem; color: var(--text); }
 .navbar nav { display: flex; gap: 1.2rem; align-items: center; }
 .navbar nav a { color: var(--text); }
+.menu-toggle {
+  display: none;
+  width: 42px;
+  height: 42px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--surface);
+  cursor: pointer;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  gap: 5px;
+}
+.menu-toggle span {
+  width: 20px;
+  height: 2px;
+  border-radius: 999px;
+  background: var(--text);
+  display: block;
+}
 .link-btn {
   background: none; border: none; color: var(--text); cursor: pointer;
   font: inherit; padding: 0;
+}
+
+@media (max-width: 500px) {
+  .navbar {
+    padding: 0.8rem 1rem;
+    position: sticky;
+  }
+
+  .menu-toggle {
+    display: flex;
+  }
+
+  .navbar nav {
+    display: none;
+    position: absolute;
+    top: calc(100% + 0.5rem);
+    right: 1rem;
+    min-width: 180px;
+    padding: 0.6rem;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.2rem;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    box-shadow: var(--shadow);
+  }
+
+  .navbar nav.open {
+    display: flex;
+  }
+
+  .navbar nav a,
+  .navbar nav .link-btn {
+    width: 100%;
+    padding: 0.75rem 0.8rem;
+    border-radius: 8px;
+    text-align: left;
+  }
+
+  .navbar nav a:hover,
+  .navbar nav .link-btn:hover {
+    background: var(--surface-2);
+    text-decoration: none;
+  }
 }
 
 /* Layout */
@@ -140,6 +205,37 @@ input:focus, textarea:focus {
 #host-map { height: 320px; min-height: 0; margin: 1rem 0; }
 .row { display: flex; gap: 1rem; }
 .row.between { justify-content: space-between; align-items: flex-end; flex-wrap: wrap; }
+.dashboard-header {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1.2rem;
+  flex-wrap: wrap;
+}
+.dashboard-summary {
+  margin-bottom: 1rem;
+  padding: 1rem 1.2rem;
+}
+.dashboard-card h2 {
+  font-size: 1.1rem;
+}
+.dashboard-form {
+  margin-top: 1rem;
+}
+.dashboard-actions {
+  flex-wrap: wrap;
+}
+@media (max-width: 600px) {
+  .dashboard-header {
+    align-items: stretch;
+  }
+  .dashboard-header .btn,
+  .dashboard-actions .btn {
+    width: 100%;
+    text-align: center;
+  }
+}
 
 /* Party cards grid */
 .grid {

@@ -30,6 +30,11 @@ function updateNav() {
   document.getElementById("nav-logout").hidden = !currentUser;
 }
 
+function closeNavMenu() {
+  document.getElementById("nav-links").classList.remove("open");
+  document.getElementById("nav-toggle").setAttribute("aria-expanded", "false");
+}
+
 // ---------- Router ----------
 const routes = {
   "/":         renderHome,
@@ -53,13 +58,26 @@ document.addEventListener("click", (e) => {
   if (a) {
     e.preventDefault();
     location.hash = a.getAttribute("href").replace(/^#/, "");
+    closeNavMenu();
   }
+});
+
+document.getElementById("nav-toggle").addEventListener("click", (e) => {
+  e.stopPropagation();
+  const nav = document.getElementById("nav-links");
+  const isOpen = nav.classList.toggle("open");
+  e.currentTarget.setAttribute("aria-expanded", String(isOpen));
+});
+
+document.addEventListener("click", (e) => {
+  if (!e.target.closest(".navbar")) closeNavMenu();
 });
 
 document.getElementById("nav-logout").addEventListener("click", () => {
   tokenStore.clear();
   currentUser = null;
   updateNav();
+  closeNavMenu();
   location.hash = "/";
   toast("Logged out");
   document.getElementById("get-started").style.display = "block";
@@ -161,13 +179,15 @@ async function renderMap() {
     const weatherBadge = weather
     ? `<span class="weather">${weatherEmoji(weather.weather_code)} ${Math.round(weather.temperature_2m)}°C</span>`
     : "";
+    const placeName = await fetchPlaceName(p.lat, p.lng);
+    const placeBadge = placeName ? `<div class="meta">Near ${escapeHtml(placeName)}</div>` : "";
     const marker = L.marker([p.lat, p.lng]).addTo(map);
-    marker.bindPopup(popupHtml(p, weatherBadge));
+    marker.bindPopup(popupHtml(p, weatherBadge, placeBadge));
     marker.on("popupopen", () => wireAttendButtons(p));
 
     const card = document.createElement("div");
     card.className = "party-card";
-    card.innerHTML = cardHtml(p, weatherBadge);
+    card.innerHTML = cardHtml(p, weatherBadge, placeBadge);
     list.appendChild(card);
     card.querySelector("button")?.addEventListener("click", () => attend(p.id));
   }
@@ -183,14 +203,15 @@ async function renderMap() {
   });
 }
 
-function popupHtml(p, weatherBadge) {
+function popupHtml(p, weatherBadge, placeBadge) {
   const spots = p.capacity - p.attendeeIds.length;
   const attending = p.attendeeIds.includes(currentUser.id);
   return `<div class="popup-content">
     <strong>${escapeHtml(p.title)}</strong> <span class="weather">${weatherBadge}</span><br/>
     <small>Hosted by ${escapeHtml(p.hostName)}</small>
     <p>${escapeHtml(p.description)}</p>
-    <div class="muted">${new Date(p.startsAt).toLocaleString()}</div>
+    ${placeBadge}
+    <div class="muted">${new Date(p.startsAt).toLocaleString().split(":")[0] + ":" + new Date(p.startsAt).toLocaleString().split(":")[1]}</div>
     <div class="muted">${p.attendeeIds.length}/${p.capacity} attending • Ages ${p.minAge}–${p.maxAge}</div>
     ${attending
       ? `<span class="badge">You're attending</span>`
@@ -198,12 +219,13 @@ function popupHtml(p, weatherBadge) {
   </div>`;
 }
 
-function cardHtml(p, weatherBadge) {
+function cardHtml(p, weatherBadge, placeBadge) {
   const spots = p.capacity - p.attendeeIds.length;
   const attending = p.attendeeIds.includes(currentUser.id);
   return `<h3>${escapeHtml(p.title)} <span class="weather muted">${weatherBadge}</span></h3>
     <div class="meta">${escapeHtml(p.description)}</div>
-    <div class="meta">📅 ${new Date(p.startsAt).toLocaleString()}</div>
+    ${placeBadge}
+    <div class="meta">📅 ${new Date(p.startsAt).toLocaleString().split(":")[0] + ":" + new Date(p.startsAt).toLocaleString().split(":")[1]}</div>
     <div class="meta">👥 ${p.attendeeIds.length}/${p.capacity} • Ages ${p.minAge}–${p.maxAge}</div>
     ${attending
       ? `<span class="badge">You're attending</span>`
