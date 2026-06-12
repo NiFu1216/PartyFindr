@@ -190,7 +190,7 @@ async function renderMap() {
     card.innerHTML = cardHtml(p, weatherBadge, placeBadge);
     list.appendChild(card);
     const attending = p.attendeeIds.includes(currentUser.id);
-    attending? card.querySelector("button").addEventListener("click", () => unattend(p.id)): card.querySelector("button").addEventListener("click", () => attend(p.id));
+    attending? card.querySelector("button").addEventListener("click", () => unattend(p.id, false)): card.querySelector("button").addEventListener("click", () => attend(p.id));
   }
 
   document.getElementById("apply-filter").addEventListener("click", () => {
@@ -236,7 +236,7 @@ function cardHtml(p, weatherBadge, placeBadge) {
 function wireAttendButtons(party) {
   const attending = party.attendeeIds.includes(currentUser.id);
   document.querySelectorAll("[data-attend]").forEach(btn => {
-    attending? btn.addEventListener("click", () => unattend(btn.dataset.attend), { once: true }) : btn.addEventListener("click", () => attend(btn.dataset.attend), { once: true });
+    attending? btn.addEventListener("click", () => unattend(btn.dataset.attend, false), { once: true }) : btn.addEventListener("click", () => attend(btn.dataset.attend), { once: true });
   });
 }
 
@@ -248,11 +248,11 @@ async function attend(id) {
   } catch (err) { toast(err.message, true); }
 }
 
-async function unattend(id){
+async function unattend(id, from_profile) {
   try {
     await api.unattendParty(id);
     toast("You're no longer attending! ❌");
-    renderMap();
+    from_profile? renderProfile() : renderMap();
   } catch (err) { toast(err.message, true); }
 }
 
@@ -317,7 +317,7 @@ async function renderProfile() {
         <div class="meta">📅 ${new Date(p.startsAt).toLocaleString()}</div>
         <div class="meta">👥 ${p.attendeeIds.length}/${p.capacity}</div>
         <button class="btn attending">Attending</button>`;
-      card.querySelectorAll("button").forEach(btn => btn.addEventListener("click", () => unattend(p.id), { once: true }));
+      card.querySelectorAll("button").forEach(btn => btn.addEventListener("click", () => unattend(p.id, true), { once: true }));
       list.appendChild(card);
     }
   } catch (err) { toast(err.message, true); }
