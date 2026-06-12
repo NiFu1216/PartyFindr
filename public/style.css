@@ -256,6 +256,13 @@ input:focus, textarea:focus {
   background: var(--success); color: #04210f; font-size: 0.8rem; font-weight: 600;
 }
 
+.attending {
+  background: var(--success);
+  color: #04210f;
+  padding: 0.5rem 0.9rem;
+  font-weight: 600;
+}
+
 /* Leaflet popup tweaks */
 .leaflet-popup-content-wrapper {
   background: var(--surface); color: var(--text);

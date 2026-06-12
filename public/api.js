@@ -2,6 +2,7 @@
  * Tiny AJAX wrapper around the Express backend.
  * Stores the JWT token in localStorage.
  */
+
 const TOKEN_KEY = "partyfindr_token";
 
 const tokenStore = {
@@ -36,6 +37,7 @@ const api = {
   updateParty:  (id, input) => request("/parties/" + id, { method: "PUT", body: JSON.stringify(input) }),
   deleteParty:  (id) => request("/parties/" + id, { method: "DELETE" }),
   attendParty:  (id) => request("/parties/" + id + "/attend", { method: "POST" }),
+  unattendParty: (id) => request("/parties/" + id + "/attend", { method: "DELETE" }),
   myAttended:   () => request("/me/attended"),
 };
 
@@ -51,13 +53,9 @@ async function fetchWeather(lat, lng) {
 }
 
 async function fetchPlaceName(lat, lng) {
-  try {
-    const url = `https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${lat}&lon=${lng}`;
-    const res = await fetch(url, { headers: { Accept: "application/json" } });
-    if (!res.ok) return "";
-    const data = await res.json();
-    return data.name || data.address?.suburb || data.address?.city || data.address?.town || "";
-  } catch { return ""; }
+  const res = await fetch(`/api/geocode?lat=${lat}&lng=${lng}`);
+  const data = await res.json();
+  return data.place;
 }
 
 function weatherEmoji(code) {

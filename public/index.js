@@ -135,6 +135,10 @@ function renderRegister() {
   });
 }
 
+async function testFunction() {
+  api.listParties().then(parties => console.log(parties));
+}
+
 async function renderMap() {
   if (!currentUser) { location.hash = "/login"; return; }
   render("tpl-map");
@@ -189,7 +193,8 @@ async function renderMap() {
     card.className = "party-card";
     card.innerHTML = cardHtml(p, weatherBadge, placeBadge);
     list.appendChild(card);
-    card.querySelector("button")?.addEventListener("click", () => attend(p.id));
+    const attending = p.attendeeIds.includes(currentUser.id);
+    attending? card.querySelector("button").addEventListener("click", () => unattend(p.id)): card.querySelector("button").addEventListener("click", () => attend(p.id));
   }
 
   document.getElementById("apply-filter").addEventListener("click", () => {
@@ -214,7 +219,7 @@ function popupHtml(p, weatherBadge, placeBadge) {
     <div class="muted">${new Date(p.startsAt).toLocaleString().split(":")[0] + ":" + new Date(p.startsAt).toLocaleString().split(":")[1]}</div>
     <div class="muted">${p.attendeeIds.length}/${p.capacity} attending • Ages ${p.minAge}–${p.maxAge}</div>
     ${attending
-      ? `<span class="badge">You're attending</span>`
+      ? `<button class="btn attending" data-attend="${p.id}">You're attending</button>`
       : `<button class="btn primary" data-attend="${p.id}" ${spots <= 0 ? "disabled" : ""}>Attend party (${spots} left)</button>`}
   </div>`;
 }
@@ -228,20 +233,29 @@ function cardHtml(p, weatherBadge, placeBadge) {
     <div class="meta">📅 ${new Date(p.startsAt).toLocaleString().split(":")[0] + ":" + new Date(p.startsAt).toLocaleString().split(":")[1]}</div>
     <div class="meta">👥 ${p.attendeeIds.length}/${p.capacity} • Ages ${p.minAge}–${p.maxAge}</div>
     ${attending
-      ? `<span class="badge">You're attending</span>`
+      ? `<button class="btn attending">You're attending</button>`
       : `<button class="btn primary" ${spots <= 0 ? "disabled" : ""}>Attend (${spots} left)</button>`}`;
 }
 
 function wireAttendButtons(party) {
+  const attending = party.attendeeIds.includes(currentUser.id);
   document.querySelectorAll("[data-attend]").forEach(btn => {
-    btn.addEventListener("click", () => attend(btn.dataset.attend), { once: true });
+    attending? btn.addEventListener("click", () => unattend(btn.dataset.attend), { once: true }) : btn.addEventListener("click", () => attend(btn.dataset.attend), { once: true });
   });
 }
 
 async function attend(id) {
   try {
     await api.attendParty(id);
-    toast("You're attending! 🎉");
+    toast("You're attending! ✔️");
+    renderMap();
+  } catch (err) { toast(err.message, true); }
+}
+
+async function unattend(id){
+  try {
+    await api.unattendParty(id);
+    toast("You're no longer attending! ❌");
     renderMap();
   } catch (err) { toast(err.message, true); }
 }
@@ -306,7 +320,8 @@ async function renderProfile() {
       card.innerHTML = `<h3>${escapeHtml(p.title)}</h3>
         <div class="meta">📅 ${new Date(p.startsAt).toLocaleString()}</div>
         <div class="meta">👥 ${p.attendeeIds.length}/${p.capacity}</div>
-        <span class="badge">Attending</span>`;
+        <button class="btn attending">Attending</button>`;
+      card.querySelectorAll("button").forEach(btn => btn.addEventListener("click", () => unattend(p.id), { once: true }));
       list.appendChild(card);
     }
   } catch (err) { toast(err.message, true); }

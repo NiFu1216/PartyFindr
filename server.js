@@ -8,6 +8,7 @@
  * Then open http://localhost:3000
  */
 
+require("dotenv").config();
 const express = require("express");
 const path = require("path");
 const cors = require("cors");
@@ -238,10 +239,44 @@ app.post("/parties/:id/attend", authMiddleware, (req, res) => {
   res.json(partyWithAttendees(row));
 });
 
+app.delete("/parties/:id/attend", authMiddleware, (req, res) => {
+  const row = db.prepare("SELECT * FROM parties WHERE id = ?").get(req.params.id);
+  if (!row) return res.status(404).json({ error: "Party not found." });
+  db.prepare("DELETE FROM attendance WHERE party_id = ? AND user_id = ?").run(req.params.id, req.userId);
+  res.json(partyWithAttendees(row));
+});
+
 app.get("/me/attended", authMiddleware, (req, res) => {
   const rows = db.prepare(`SELECT p.* FROM parties p
     JOIN attendance a ON a.party_id = p.id WHERE a.user_id = ?`).all(req.userId);
   res.json(rows.map(partyWithAttendees));
+});
+
+app.get("/api/geocode", async (req, res) => {
+  const { lat, lng } = req.query;
+
+  const url =
+    `https://api.opencagedata.com/geocode/v1/json` +
+    `?q=${lat}+${lng}` +
+    `&key=${process.env.OPENCAGE_API_KEY}` +
+    `&no_annotations=1`;
+
+  const r = await fetch(url);
+  const data = await r.json();
+
+  const result = data.results?.[0];
+  const c = result?.components;
+
+  res.json({
+    place:
+      c?.road ||
+      c?.neighbourhood ||
+      c?.suburb ||
+      c?.city_district ||
+      c?.city ||
+      result?.formatted ||
+      ""
+  });
 });
 
 app.listen(PORT, () => {
