@@ -135,10 +135,6 @@ function renderRegister() {
   });
 }
 
-async function testFunction() {
-  api.listParties().then(parties => console.log(parties));
-}
-
 async function renderMap() {
   if (!currentUser) { location.hash = "/login"; return; }
   render("tpl-map");
